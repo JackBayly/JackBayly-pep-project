@@ -17,4 +17,13 @@ public class MessageService {
 
         return messageDAO.insertMessage(message);
     }
+    public Message deleteMessage(int id) {
+        System.out.println("het thereee");
+        System.out.println(id);
+
+        return messageDAO.deleteMessage(id);
+    }
+    public Message getMessage(int id){
+        return messageDAO.getMessage(id);
+    }
  }

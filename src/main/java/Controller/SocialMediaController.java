@@ -10,6 +10,8 @@ import Service.MessageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import static java.lang.Integer.parseInt;
+
 /**
  * TODO: You will need to write your own endpoints and handlers for your controller. The endpoints you will need can be
  * found in readme.md as well as the test cases. You should
@@ -31,6 +33,7 @@ public class SocialMediaController {
 
 //        app.get("/messages", this::getAllMessagesHandler);
         app.post("/messages", this::postMessageHandler);
+        app.delete("/messages/<id>", this::deleteMessageHandler);
 //        app.get("/accounts", this::getAllAccountsHandler);
 //        app.post("/accounts", this::postAccountHandler);
 //        app.get("/books/available", this::getAvailableBooksHandler);
@@ -63,6 +66,30 @@ public class SocialMediaController {
             ctx.status(400);
             System.out.println("hello");
         }
+    }
+    private void deleteMessageHandler(Context ctx) throws JsonProcessingException {
+       int message_id = parseInt(ctx.pathParam("id"));
+        ObjectMapper mapper = new ObjectMapper();
+        Message foundMessage = messageService.getMessage(message_id);
+
+            if(foundMessage!=null){
+                Message deletedMessage = messageService.deleteMessage(message_id);
+                System.out.println(foundMessage.time_posted_epoch);
+                if(deletedMessage!=null){
+                    System.out.println("Message Deleted");
+                    ctx.json(mapper.writeValueAsString(foundMessage));
+                    System.out.println();
+                    System.out.println("We were here");
+
+                }else{
+                    ctx.status(400);
+                    System.out.println("hello");
+                }
+
+            } else {
+                ctx.json("");
+            }
+
     }
 
 
