@@ -119,4 +119,79 @@ public class MessageDAO {
         }
         return null;
     }
+
+    public List<Message> getAllMessages() {
+        Connection connection = ConnectionUtil.getConnection();
+        try {
+            //Write SQL logic here
+            String sql = "SELECT * FROM Message";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            ResultSet pkeyResultSet =  preparedStatement.executeQuery();
+            ArrayList<Message> messageList= new ArrayList<Message>();
+            while(pkeyResultSet.next()) {
+                System.out.println("Helloooo Person");
+                int message_id = pkeyResultSet.getInt(1);
+                int posted_by = pkeyResultSet.getInt(2);
+
+                String message_text = pkeyResultSet.getString(3);
+
+                long time_posted_epoch = pkeyResultSet.getLong(4);
+                System.out.println(message_text);
+
+                Message message = new Message(message_id, posted_by, message_text, time_posted_epoch);
+                messageList.add(message);
+            }
+            return messageList;
+        }catch(SQLException e){
+            System.out.println("We got a sql error");
+            System.out.println(e.getMessage());
+        }
+            return null;
+    }
+
+    public Message updateMessage(int messageId, String updatedtext) {
+        Connection connection = ConnectionUtil.getConnection();
+        try {
+            //Write SQL logic here
+            String sql = "UPDATE Message SET message_text=? WHERE message_id=?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
+
+            //write preparedStatement's setString and setInt methods here.
+            preparedStatement.setString(1,updatedtext);
+            preparedStatement.setInt(2,messageId);
+
+
+
+           preparedStatement.executeUpdate();
+            ResultSet rs =  preparedStatement.getGeneratedKeys();
+ System.out.println(preparedStatement.getUpdateCount());
+        // System.out.println(rs.getMetaData());
+//            if(pkeyResultSet==null){
+//                System.out.println("no keys returned");
+//            }
+            //int generated_message_id2 = (int) pkeyResultSet.getInt(0);
+            //System.out.println(generated_message_id2);
+
+            if(rs.next()){
+                System.out.println("HIt the next");
+
+//                int posted_by = rs.getInt(2);
+//
+//                String message_text = rs.getString(1);
+//
+//                long time_posted_epoch = rs.getLong(3);
+               // System.out.println(message_text);
+
+                Message message = getMessage(messageId);
+                return message;
+
+            }
+
+        }catch(SQLException e){
+            System.out.println("We got a sql error");
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
 }
