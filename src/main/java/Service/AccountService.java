@@ -1,7 +1,5 @@
 package Service;
-
 import DAO.AccountDAO;
-import DAO.MessageDAO;
 import Model.Account;
 
 public class AccountService {
