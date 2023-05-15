@@ -194,4 +194,35 @@ public class MessageDAO {
         }
         return null;
     }
+
+    public List<Message> getAllMessagesByUserId(int accountId) {
+        Connection connection = ConnectionUtil.getConnection();
+        try {
+            //Write SQL logic here
+            String sql = "SELECT * FROM Message WHERE posted_by= ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1,accountId);
+
+            ResultSet pkeyResultSet =  preparedStatement.executeQuery();
+            ArrayList<Message> messageList= new ArrayList<Message>();
+            while(pkeyResultSet.next()) {
+                System.out.println("Helloooo Person");
+                int message_id = pkeyResultSet.getInt(1);
+                int posted_by = pkeyResultSet.getInt(2);
+
+                String message_text = pkeyResultSet.getString(3);
+
+                long time_posted_epoch = pkeyResultSet.getLong(4);
+                System.out.println(message_text);
+
+                Message message = new Message(message_id, posted_by, message_text, time_posted_epoch);
+                messageList.add(message);
+            }
+            return messageList;
+        }catch(SQLException e){
+            System.out.println("We got a sql error");
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
 }

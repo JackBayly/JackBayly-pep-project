@@ -11,6 +11,7 @@ import Service.MessageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Integer.parseInt;
@@ -22,6 +23,7 @@ import static java.lang.Integer.parseInt;
  */
 public class SocialMediaController {
     MessageService messageService;
+    AccountService accountService;
     /**
      * In order for the test cases to work, you will need to write the endpoints in the startAPI() method, as the test
      * suite must receive a Javalin object from this method.
@@ -29,7 +31,7 @@ public class SocialMediaController {
      */
     public SocialMediaController(){
         this.messageService = new MessageService();
-
+        this.accountService = new AccountService();
     }
     public Javalin startAPI() {
         Javalin app = Javalin.create();
@@ -40,11 +42,82 @@ public class SocialMediaController {
         app.post("/messages", this::postMessageHandler);
         app.delete("/messages/<id>", this::deleteMessageHandler);
 
-//        app.get("/accounts", this::getAllAccountsHandler);
-//        app.post("/accounts", this::postAccountHandler);
-//        app.get("/books/available", this::getAvailableBooksHandler);
+       app.get("/accounts/<id>/messages", this::getAllMessagesFromAccountHandler);
+       app.post("/register", this::createAccountHandler);
+        app.post("/login", this::loginHandler);
 
         return app;
+    }
+
+    private void loginHandler(Context ctx) throws JsonProcessingException{
+        ObjectMapper mapper = new ObjectMapper();
+        Account account = mapper.readValue(ctx.body(), Account.class);
+
+        System.out.println("Yoo we are eherere3r");
+        if(account.username.length() ==0||account.password.length()<=4){
+            ctx.json("");
+            ctx.status(400);
+        } else {
+            Account foundAccount = accountService.login(account);
+
+            if(foundAccount!=null){
+                ctx.json(mapper.writeValueAsString(foundAccount));
+
+            } else {
+                ctx.json("");
+                ctx.status(401);
+
+            }
+        }
+    }
+
+    private void createAccountHandler(Context ctx) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Account account = mapper.readValue(ctx.body(), Account.class);
+
+System.out.println("Yoo we are eherere3r");
+        if(account.username.length() ==0||account.password.length()<=4){
+            ctx.json("");
+            ctx.status(400);
+        } else {
+            Account foundAccount = accountService.getAccountByUsername(account.username);
+            if(foundAccount!=null){
+                ctx.json("");
+                ctx.status(400);
+            } else {
+                Account addedAccount = accountService.addAccount(account);
+
+                if (addedAccount != null) {
+                    ctx.json(mapper.writeValueAsString(addedAccount));
+
+
+                } else {
+                    ctx.status(400);
+                    System.out.println("hello");
+                }
+            }
+        }
+
+    }
+
+    private void getAllMessagesFromAccountHandler(Context ctx) throws JsonProcessingException {
+        int userId = parseInt(ctx.pathParam("id"));
+
+        ObjectMapper mapper = new ObjectMapper();
+        Account foundAccount = accountService.getAccount(userId);
+        List<Message> foundMessages= new ArrayList<Message>();
+        if(foundAccount!=null){
+          foundMessages = messageService.getAllMessagesByUserId(foundAccount.account_id);
+            ctx.json(mapper.writeValueAsString(foundMessages));
+
+
+
+        } else {
+            ctx.json(mapper.writeValueAsString(foundMessages));
+
+        }
+
+
     }
 
     private void updateMessageByIdHandler(Context ctx) throws JsonProcessingException {
